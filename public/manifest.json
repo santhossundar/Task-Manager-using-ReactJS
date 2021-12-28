@@ -1,0 +1,6 @@
+{
+  "short_name": "Tasky",
+  "name": "Task Manager",
+  "start_url": ".",
+  "display": "standalone"
+}
