@@ -1,37 +1,62 @@
 import React from 'react';
 import axios from 'axios';
+import Tasks from './Tasks';
+import {useEffect, useState} from 'react';
 
-class Form extends React.Component{
 
-    constructor(props){
-        super(props);
+const Form = () => {
 
-        this.state = {
-            task: '',
-            when: ''
-        }
-    }
+    const [tasks, setTasks] = useState([]);
+    const [task, setTask] = useState('');
+    const [when, setWhen] = useState('');
+    const [tempTask, setTempTask] = useState([]);
+    const [tempWhen, setTempWhen] = useState([]);
+
+
+    useEffect(() => {
+
+        axios.get('http://localhost:5000/tasks')
+        .then(response => {
   
-    taskHandler = (e) => {
-        this.setState({
-            task: e.target.value,           
+            setTasks(response.data);
+            
         })
+        .catch(error => {
+            console.log(error)
+        });
+  
+      }, []);
+  
+    const taskHandler = (e) => {
+        setTask(e.target.value);
     }
 
-    whenHandler = (e) => {
-        this.setState({
-            when: e.target.value,           
-        })
+    const whenHandler = (e) => {
+        setWhen(e.target.value);
     }
 
-    submitHandler = () => {
-        if(!this.state.task && !this.state.when){
+    const submitHandler = (e) => {
+        e.preventDefault();
+
+        if(!task && !when){
             alert("Fields are empty!");
 
         } else {
-            axios.post('http://localhost:5000/tasks', this.state)
+
+            const taskObj = {
+                task: task,
+                when: when
+            };
+
+            axios.post('http://localhost:5000/tasks', taskObj)
             .then(response => {
                 console.log(response.data);
+
+                tasks.push(response.data);
+
+                setTasks(tasks.map((obj)=>{
+                    return obj
+                }));
 
             })
             .catch(error => {
@@ -40,32 +65,39 @@ class Form extends React.Component{
         }
     }
 
-    render(){
+    return (
 
-        return (
+        <>
 
-                <div className="form-container">
+            <div className="form-container">
 
-                    <input className="in-task"
+                <input className="in-task"
                         placeholder="Task"
                         type="text"
-                        value={this.state.task}
-                        onChange={this.taskHandler}/>
+                        value={task}
+                        onChange={taskHandler}/>
 
-                    <input className="in-when"
+                <input className="in-when"
                         placeholder="Day & Time"
                         type="text"
-                        value={this.state.when}
-                        onChange={this.whenHandler}/>                    
+                        value={when}
+                        onChange={whenHandler}/>                    
 
-                    <button className="btn-submit" 
+                <button className="btn-submit" 
                         type="submit" 
-                        onClick={this.submitHandler}>ADD</button>
+                        onClick={submitHandler}>ADD</button>
+               
+            </div>   
 
-                </div>               
+            <div className="tasks-container" >
+                    
+                <Tasks t={tasks}/>
+                    
+            </div> 
+
+        </>           
                            
-         )   
-    }
+    )   
 };
 
 export default Form
